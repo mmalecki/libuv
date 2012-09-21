@@ -123,6 +123,7 @@ extern "C" {
   XX( 56, EROFS, "read-only file system") \
   XX( 57, ENODEV, "no such device") \
   XX( 58, ESPIPE, "invalid seek") \
+  XX( 59, EDQUOT, "disk quota exceeded") \
 
 
 #define UV_ERRNO_GEN(val, name, s) UV_##name = val,
