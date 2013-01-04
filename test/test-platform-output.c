@@ -83,5 +83,17 @@ TEST_IMPL(platform_output) {
   }
   uv_free_interface_addresses(interfaces, count);
 
+  err = uv_hostname(buffer, sizeof(buffer));
+  ASSERT(UV_OK == err.code);
+  printf("uv_hostname: %s\n", buffer);
+
+  err = uv_os_type(buffer, sizeof(buffer));
+  ASSERT(UV_OK == err.code);
+  printf("uv_os_type: %s\n", buffer);
+
+  err = uv_os_release(buffer, sizeof(buffer));
+  ASSERT(UV_OK == err.code);
+  printf("uv_os_release: %s\n", buffer);
+
   return 0;
 }

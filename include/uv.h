@@ -1468,6 +1468,25 @@ UV_EXTERN void uv_free_interface_addresses(uv_interface_address_t* addresses,
   int count);
 
 /*
+ * This gets maximum of `size` chars from machine's hostname and saves it to
+ * `hostname` parameter.
+ */
+UV_EXTERN uv_err_t uv_hostname(char* hostname, size_t size);
+
+
+/*
+ * This gets maximum of `size` chars from machine's OS type and saves it to
+ * `type` parameter.
+ */
+UV_EXTERN uv_err_t uv_os_type(char* type, size_t size);
+
+/*
+ * This gets maximum of `size` chars from machine's OS release version and
+ * saves it to `release` parameter.
+ */
+UV_EXTERN uv_err_t uv_os_release(char* release, size_t size);
+
+/*
  * File System Methods.
  *
  * The uv_fs_* functions execute a blocking system call asynchronously (in a

@@ -141,6 +141,7 @@
             'src/unix/timer.c',
             'src/unix/tty.c',
             'src/unix/udp.c',
+            'src/unix/os.c',
           ],
           'link_settings': {
             'libraries': [ '-lm' ],
