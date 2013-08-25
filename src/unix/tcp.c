@@ -59,7 +59,8 @@ static int maybe_new_socket(uv_tcp_t* handle, int domain, int flags) {
 static int uv__bind(uv_tcp_t* tcp,
                     int domain,
                     struct sockaddr* addr,
-                    int addrsize) {
+                    int addrsize,
+                    unsigned flags) {
   int err;
   int on;
 
@@ -70,6 +71,11 @@ static int uv__bind(uv_tcp_t* tcp,
   on = 1;
   if (setsockopt(tcp->io_watcher.fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)))
     return -errno;
+
+  if (flags & UV_TCP_REUSEPORT) {
+    if (setsockopt(tcp->io_watcher.fd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on)))
+      return -errno;
+  }
 
   errno = 0;
   if (bind(tcp->io_watcher.fd, addr, addrsize) && errno != EADDRINUSE)
@@ -133,19 +139,21 @@ static int uv__connect(uv_connect_t* req,
 }
 
 
-int uv__tcp_bind(uv_tcp_t* handle, struct sockaddr_in addr) {
+int uv__tcp_bind(uv_tcp_t* handle, struct sockaddr_in addr, unsigned flags) {
   return uv__bind(handle,
                   AF_INET,
                   (struct sockaddr*)&addr,
-                  sizeof(struct sockaddr_in));
+                  sizeof(struct sockaddr_in),
+                  flags);
 }
 
 
-int uv__tcp_bind6(uv_tcp_t* handle, struct sockaddr_in6 addr) {
+int uv__tcp_bind6(uv_tcp_t* handle, struct sockaddr_in6 addr, unsigned flags) {
   return uv__bind(handle,
                   AF_INET6,
                   (struct sockaddr*)&addr,
-                  sizeof(struct sockaddr_in6));
+                  sizeof(struct sockaddr_in6),
+                  flags);
 }
 
 
@@ -275,6 +283,15 @@ int uv__tcp_keepalive(int fd, int on, unsigned int delay) {
 }
 
 
+int uv__tcp_reuseport(int fd, int on) {
+#ifdef SO_REUSEPORT
+  return setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on));
+#else
+  return -ENOSYS;
+#endif
+}
+
+
 int uv_tcp_nodelay(uv_tcp_t* handle, int on) {
   int err;
 
@@ -314,6 +331,23 @@ int uv_tcp_keepalive(uv_tcp_t* handle, int on, unsigned int delay) {
   return 0;
 }
 
+
+int uv_tcp_reuseport(uv_tcp_t* handle, int on) {
+  int err;
+
+  if (uv__stream_fd(handle) != -1) {
+    err = uv__tcp_nodelay(uv__stream_fd(handle), on);
+    if (err)
+      return err;
+  }
+
+  if (on)
+    handle->flags |= UV_TCP_NODELAY;
+  else
+    handle->flags &= ~UV_TCP_NODELAY;
+
+  return 0;
+}
 
 int uv_tcp_simultaneous_accepts(uv_tcp_t* handle, int enable) {
   if (enable)

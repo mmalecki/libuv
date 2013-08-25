@@ -189,19 +189,19 @@ int uv_ip6_name(struct sockaddr_in6* src, char* dst, size_t size) {
 }
 
 
-int uv_tcp_bind(uv_tcp_t* handle, struct sockaddr_in addr) {
+int uv_tcp_bind(uv_tcp_t* handle, struct sockaddr_in addr, unsigned flags) {
   if (handle->type != UV_TCP || addr.sin_family != AF_INET)
     return UV_EINVAL;
   else
-    return uv__tcp_bind(handle, addr);
+    return uv__tcp_bind(handle, addr, flags);
 }
 
 
-int uv_tcp_bind6(uv_tcp_t* handle, struct sockaddr_in6 addr) {
+int uv_tcp_bind6(uv_tcp_t* handle, struct sockaddr_in6 addr, unsigned flags) {
   if (handle->type != UV_TCP || addr.sin6_family != AF_INET6)
     return UV_EINVAL;
   else
-    return uv__tcp_bind6(handle, addr);
+    return uv__tcp_bind6(handle, addr, flags);
 }
 
 
