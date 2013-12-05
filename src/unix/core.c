@@ -580,15 +580,15 @@ ssize_t uv__recvmsg(int fd, struct msghdr* msg, int flags) {
 }
 
 
-int uv_cwd(char* buffer, size_t size) {
-  if (buffer == NULL)
+int uv_cwd(char* buffer, size_t* size) {
+  if (buffer == NULL || size == NULL)
     return -EINVAL;
 
-  if (size == 0)
-    return -EINVAL;
-
-  if (getcwd(buffer, size) == NULL)
+  if (getcwd(buffer, *size - 1) == NULL)
     return -errno;
+
+  *size = strlen(buffer);
+  buffer[*size] = '\0';
 
   return 0;
 }

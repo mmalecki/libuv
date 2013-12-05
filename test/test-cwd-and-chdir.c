@@ -24,17 +24,20 @@
 #include <string.h>
 
 #define PATHMAX 1024
+#define SHORT 2
 extern char executable_path[];
 
 TEST_IMPL(cwd_and_chdir) {
   char buffer_orig[PATHMAX];
   char buffer_new[PATHMAX];
+  char buffer_short[SHORT];
   size_t size;
+  size_t size_short;
   char* last_slash;
   int err;
 
   size = sizeof(buffer_orig) / sizeof(buffer_orig[0]);
-  err = uv_cwd(buffer_orig, size);
+  err = uv_cwd(buffer_orig, &size);
   ASSERT(err == 0);
 
   /* Remove trailing slash unless at a root directory. */
@@ -55,10 +58,16 @@ TEST_IMPL(cwd_and_chdir) {
   err = uv_chdir(buffer_orig);
   ASSERT(err == 0);
 
-  err = uv_cwd(buffer_new, size);
+  err = uv_cwd(buffer_new, &size);
   ASSERT(err == 0);
 
   ASSERT(strcmp(buffer_orig, buffer_new) == 0);
+
+  size_short = sizeof(buffer_short) / sizeof(buffer_short[0]);
+  err = uv_cwd(buffer_short, &size_short);
+  ASSERT(err == 0);
+  ASSERT(buffer_short[0] == buffer_new[0]);
+  ASSERT(buffer_short[1] == '\0');
 
   return 0;
 }
